@@ -1,7 +1,7 @@
 import { ColorArray, LocationType, Response, Target } from "./types"
 
- export const fetchColor = async () => {
-    const response = await fetch('http://localhost:9876/init')
+ export const fetchColor = async (userId?:string) => {
+    const response = userId ? await fetch('http://localhost:9876/init/user/'+userId) : await fetch('http://localhost:9876/init')
     const data = await response.json() as Response
     return data
   }

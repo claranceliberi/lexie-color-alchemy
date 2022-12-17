@@ -43,6 +43,7 @@ export default function Circle({ color,location, clickable ,onColorChange } : Ci
         cursor: clickable ? 'pointer' : 'no-drop',
         backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
       }}
+      title={color.join(',')}
     />
   )
 }

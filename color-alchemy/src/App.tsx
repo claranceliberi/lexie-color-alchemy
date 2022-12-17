@@ -45,6 +45,7 @@ function App() {
     setXBottomColorCollection(copyColorArray(_colorArray))
     setYLeftColorCollection(copyColorArray(_colorArray))
     setYRightColorCollection(copyColorArray(_colorArray))
+    setSourceColor({})
   }
 
   const onColorChange = (location:LocationType,color?:Target) => {
@@ -123,6 +124,24 @@ function App() {
     setMovesLeft( movesLeft - 1)
   }
 
+  const judge = async () => {
+    let  finallyJudged = false;
+    if(movesLeft < 1 && confirm('Failed: Do you want to play again?')){
+      
+      finallyJudged = true;
+    }
+
+    if(closeColor.percentage < 10 && confirm('Success: Do you want to play again?')) {
+      finallyJudged = true;
+    }
+
+    if(finallyJudged) {
+      const data = await fetchColor(detail?.userId)
+      setDetail(data)
+      setMovesLeft(data?.maxMoves)
+      initiateColorArray()
+    }
+  }
 
   useEffect(() => {
     async function fetchData() {
@@ -169,6 +188,7 @@ function App() {
 
     setColorArray(_clonedColorArray)
     setCloseColor(_clonedClosestColor)
+    judge()
   } ,[xBottomColorCollection,xTopColorCollection,yLeftColorCollection,yRightColorCollection])
 
   return (
@@ -180,7 +200,7 @@ function App() {
 
       <div>
         {(colorArray && colorArray.length > 0) &&
-         <Board sourceColor={sourceColor} closeColor={closeColor} colorArray={colorArray} sourceClickable={ detail && detail?.maxMoves -  movesLeft <3}  onColorChange={onColorChange}/> }
+         <Board sourceColor={sourceColor} closeColor={closeColor} colorArray={colorArray} sourceClickable={ detail? detail?.maxMoves -  movesLeft <3 : true}  onColorChange={onColorChange}/> }
       </div>
     </div>
   )

@@ -36,8 +36,8 @@ export default function Square({ color, close,draggable = false } : SquareProps)
         borderRadius:  '2px',
         cursor: draggable ? 'grab' : 'default',
         backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
-        
       }}
+      title={color.join(',')}
     />
   )
 }
