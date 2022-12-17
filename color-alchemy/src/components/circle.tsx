@@ -5,10 +5,11 @@ import { LocationType, Target } from '../types'
 type CircleProps = {
     color: Target,
     location: LocationType,
+    clickable?: boolean,
     onColorChange: (location: LocationType,color?:Target) => void
 }
 
-export default function Circle({ color,location,onColorChange } : CircleProps) {
+export default function Circle({ color,location, clickable ,onColorChange } : CircleProps) {
     const element = useRef<HTMLDivElement>(null)
 
     function onDrag(e:DragEvent<HTMLDivElement>) {
@@ -26,7 +27,7 @@ export default function Circle({ color,location,onColorChange } : CircleProps) {
  
   return (
     <div
-        onClick={() => onColorChange(location)}
+        onClick={() => clickable && onColorChange(location)}
         onDragOver={onDrag}
         onDragEnter={onDrag}
         onDrop={onDrop}
@@ -39,6 +40,7 @@ export default function Circle({ color,location,onColorChange } : CircleProps) {
         margin: '2px',
         borderRadius:  '50%',
         border: '2px solid #ccc',
+        cursor: clickable ? 'pointer' : 'no-drop',
         backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
       }}
     />

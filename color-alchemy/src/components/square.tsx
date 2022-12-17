@@ -4,10 +4,11 @@ import { Target } from '../types'
 
 type SquareProps = {
     color: Target
+    close?: boolean
     draggable?: boolean
 }
 
-export default function Square({ color,draggable = false } : SquareProps) {
+export default function Square({ color, close,draggable = false } : SquareProps) {
   
 
   function onDrag(e:DragEvent<HTMLDivElement>){
@@ -30,10 +31,12 @@ export default function Square({ color,draggable = false } : SquareProps) {
         display:'inline-block',
         width: '30px',
         height: '30px',
-        border: '2px solid #ccc',
+        border: `2px solid ${close ? 'red' : '#ccc'}`,
         margin: '2px',
         borderRadius:  '2px',
+        cursor: draggable ? 'grab' : 'default',
         backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
+        
       }}
     />
   )

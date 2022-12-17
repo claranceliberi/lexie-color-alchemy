@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
-import { ColorArray, LocationType, Response, SourceColorType, Target } from './types'
+import { ClosestColor, ColorArray, LocationType, Response, SourceColorType, Target } from './types'
 import Square from './components/square'
 import Board from './components/Board'
-import { copyColorArray, fetchColor, locationToString } from './utils'
+import { copyColorArray, fetchColor, getColorCloseness, locationToString } from './utils'
 
 function App() {
 
@@ -16,6 +16,14 @@ function App() {
   const [xBottomColorCollection, setXBottomColorCollection] = useState<ColorArray>()
   const [sourceColor, setSourceColor] = useState<SourceColorType>({})
   const [movesLeft, setMovesLeft] = useState<number>(0)
+  const [isGameOver, setIsGameOver] = useState<boolean>(false)
+  const [isGameWon, setIsGameWon] = useState<boolean>(false)
+  const [isGameLost, setIsGameLost] = useState<boolean>(false)
+  const [closeColor, setCloseColor] = useState<ClosestColor>({
+    color: [0,0,0],
+    position: {x:0,y:0},
+    percentage:100
+  })
 
 
 
@@ -135,7 +143,11 @@ function App() {
     const height = colorArray.length
     const width = colorArray[0].length
     const _clonedColorArray = copyColorArray(colorArray)
-    console.log('working on them')
+    let _clonedClosestColor = {
+      color: [0,0,0],
+      position: {x:0,y:0},
+      percentage:100
+    } as ClosestColor
 
     for(let row=0; row<height; row++) {
       for(let col=0; col<width; col++) {
@@ -145,10 +157,18 @@ function App() {
         const f = 255/ Math.max(red,green,blue, 255)
         const result = [red * f, green * f, blue * f] as Target
         _clonedColorArray[row][col] = result
+
+        if(detail){
+          const closenessPercentage = getColorCloseness(detail?.target, result);
+          console.log('%cclosenessPercentage', `background-color: rgb(${result[0]},${result[1]},${result[2]});padding:10px; color:white;`, closenessPercentage, `{x:${col+1},y:${col+1}}` )
+          if(closenessPercentage < _clonedClosestColor.percentage)
+            _clonedClosestColor = {color: result, percentage: closenessPercentage, position: {x: col, y: row}}
+        }
       }
     }
 
     setColorArray(_clonedColorArray)
+    setCloseColor(_clonedClosestColor)
   } ,[xBottomColorCollection,xTopColorCollection,yLeftColorCollection,yRightColorCollection])
 
   return (
@@ -156,11 +176,11 @@ function App() {
       <p>User Id: {detail?.userId}</p>
       <p>MovesLeft: {movesLeft}</p>
       <p>Target Color: {detail && <Square color={detail?.target} />} </p>
-      <p>Closest Color: {detail && <Square color={detail?.target} />} </p>
+      <p>Closest Color: {detail && <Square color={closeColor.color} />} <span>  Δ= {closeColor.percentage}</span> </p>
 
       <div>
         {(colorArray && colorArray.length > 0) &&
-         <Board sourceColor={sourceColor} colorArray={colorArray}  onColorChange={onColorChange}/> }
+         <Board sourceColor={sourceColor} closeColor={closeColor} colorArray={colorArray} sourceClickable={ detail && detail?.maxMoves -  movesLeft <3}  onColorChange={onColorChange}/> }
       </div>
     </div>
   )

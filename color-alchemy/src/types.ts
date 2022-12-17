@@ -6,6 +6,15 @@ export type Response = {
         target: Target
 }
 
+export type ClosestColor = {
+        color: Target,
+        position:{
+                x: number,
+                y: number
+        }
+        percentage: number
+}
+
 export type ColorArray = Array<Array<Target>>
 export type Target = [ number, number ,number]
 export type LocationType = { x?: number, y?: number, side: 'left' | 'right' | 'top' | 'bottom' }

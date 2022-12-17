@@ -1,4 +1,4 @@
-import { ColorArray, LocationType, Response } from "./types"
+import { ColorArray, LocationType, Response, Target } from "./types"
 
  export const fetchColor = async () => {
     const response = await fetch('http://localhost:9876/init')
@@ -14,4 +14,9 @@ export const locationToString = ({x,y,side}: LocationType) => {
     return `y-${side}-${y}`
   }
 
-export const copyColorArray = (colorArray: ColorArray) => JSON.parse(JSON.stringify(colorArray)) as ColorArray
+export const copyColorArray = <T>(colorArray: T) => JSON.parse(JSON.stringify(colorArray)) as T
+
+export const getColorCloseness = (targetColor: Target, testColor: Target) => {
+  const closeness = (1/255) * (1/Math.sqrt(3)) * Math.sqrt(Math.pow(targetColor[0] - testColor[0],2) + Math.pow(targetColor[1] - testColor[1],2) + Math.pow(targetColor[2] - testColor[2],2))
+  return Math.round(closeness * 100)
+}
