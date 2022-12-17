@@ -193,6 +193,7 @@ function App() {
 
   return (
     <div className="App">
+      <h2 style={{textAlign:'left'}}>RGBA Alchemy</h2>
       <p>User Id: {detail?.userId}</p>
       <p>MovesLeft: {movesLeft}</p>
       <p>Target Color: {detail && <Square color={detail?.target} />} </p>
