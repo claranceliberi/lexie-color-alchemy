@@ -41,6 +41,7 @@ function App() {
     }
 
     setTimeout(() => {
+      setMovesLeft(detail?.maxMoves || 0)
       setColorArray(_colorArray)
       setXTopColorCollection(copyColorArray(_colorArray))
       setXBottomColorCollection(copyColorArray(_colorArray))
@@ -141,8 +142,7 @@ function App() {
       setTimeout(async () => {
         const data = await fetchColor(detail?.userId)
         setDetail(data)
-        setMovesLeft(data?.maxMoves)
-        initiateColorArray()
+
       }, 100);
     }
   }
@@ -152,7 +152,6 @@ function App() {
       isApiCallDirty = true;
       const data = await fetchColor()
       setDetail(data)
-      setMovesLeft(data?.maxMoves)
     }
     console.log('useEffect',isApiCallDirty)
     if(isApiCallDirty) return
@@ -160,6 +159,7 @@ function App() {
   }, [])
 
   useEffect(() => {
+    console.log('detail change')
     initiateColorArray()
   }, [detail])
 
