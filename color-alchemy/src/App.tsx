@@ -20,9 +20,10 @@ function App() {
     position: { x: 0, y: 0 },
     percentage: 100,
   });
-  let isApiCallDirty = false;
+  let isApiCallDirty = false; // to know if user has played at least once 
   const [isGameDirty, setIsGameDirty] = useState(false);
 
+  // set all color collection to default (black)
   const initiateColorArray = () => {
     const _colorArray: ColorArray = [];
     const defaultColor: Target = [0, 0, 0];
@@ -37,6 +38,7 @@ function App() {
       }
     }
 
+    // set all at the same time to avoid multiple re-render
     setTimeout(() => {
       setMovesLeft(detail?.maxMoves || 0);
       setColorArray(_colorArray);
@@ -65,8 +67,7 @@ function App() {
 
     setSourceColor({ ...sourceColor, [locationString]: _color });
 
-    const { x, y, side } = location;
-
+    // if one of the color collection is not set, return
     if (
       !colorArray ||
       !yLeftColorCollection ||
@@ -76,53 +77,70 @@ function App() {
     )
       return;
 
+    const { x, y, side } = location;
     const height = colorArray.length;
     const width = colorArray[0].length;
 
+    // if the source location is on horizontal, then compute horizontal color mix
     if (x || x === 0) {
+      // top horizontal computation
       if (side === "top") {
         const _clonedTopColorCollection = copyColorArray(xTopColorCollection);
+
         for (let row = height; row > 0; row--) {
-          console.log("inside top g");
-          const red = Math.round(((height + 1 - row) / (height + 1)) * _color[0]);
-          const green = Math.round(((height + 1 - row) / (height + 1)) * _color[1]);
-          const blue = Math.round(((height + 1 - row) / (height + 1)) * _color[2]);
-          _clonedTopColorCollection[row - 1][x] = [red, green, blue];
-          setXTopColorCollection(xTopColorCollection);
+          const red = ((height + 1 - row) / (height + 1)) * _color[0];
+          const green = ((height + 1 - row) / (height + 1)) * _color[1];
+          const blue = ((height + 1 - row) / (height + 1)) * _color[2];
+
+          _clonedTopColorCollection[row - 1][x] = [r(red), r(green), r(blue)];
         }
+
         setXTopColorCollection(_clonedTopColorCollection);
       }
+      // bottom horizontal computation
       if (side === "bottom") {
         const _clonedBottomColorCollection = copyColorArray(xBottomColorCollection);
+
         for (let row = 0; row < height; row++) {
-          const red = Math.round(((row + 1) / (height + 1)) * _color[0]);
-          const green = Math.round(((row + 1) / (height + 1)) * _color[1]);
-          const blue = Math.round(((row + 1) / (height + 1)) * _color[2]);
-          _clonedBottomColorCollection[row][x] = [red, green, blue];
+          const red = ((row + 1) / (height + 1)) * _color[0];
+          const green = ((row + 1) / (height + 1)) * _color[1];
+          const blue = ((row + 1) / (height + 1)) * _color[2];
+
+          _clonedBottomColorCollection[row][x] = [r(red), r(green), r(blue)];
         }
+
         setXBottomColorCollection(_clonedBottomColorCollection);
       }
     }
 
+    // if the source location is on vertical, then compute vertical color mix
     if (y || y === 0) {
+      // left vertical computation
       if (side === "left") {
         const _clonedLeftColorCollection = copyColorArray(yLeftColorCollection);
+
         for (let col = 0; col < width; col++) {
-          const red = Math.round(((width + 1 - col) / (width + 1)) * _color[0]);
-          const green = Math.round(((width + 1 - col) / (width + 1)) * _color[1]);
-          const blue = Math.round(((width + 1 - col) / (width + 1)) * _color[2]);
-          _clonedLeftColorCollection[y][col - 1] = [red, green, blue];
+          const red = ((width + 1 - col) / (width + 1)) * _color[0];
+          const green = ((width + 1 - col) / (width + 1)) * _color[1];
+          const blue = ((width + 1 - col) / (width + 1)) * _color[2];
+
+          _clonedLeftColorCollection[y][col - 1] = [r(red), r(green), r(blue)];
         }
+
         setYLeftColorCollection(_clonedLeftColorCollection);
       }
+      // right vertical computation
       if (side === "right") {
         const _clonedRightColorCollection = copyColorArray(yRightColorCollection);
+
         for (let col = 0; col < width; col++) {
-          const red = Math.round(((col + 1) / (width + 1)) * _color[0]);
-          const green = Math.round(((col + 1) / (width + 1)) * _color[1]);
-          const blue = Math.round(((col + 1) / (width + 1)) * _color[2]);
-          _clonedRightColorCollection[y][col] = [red, green, blue];
+          const red = ((col + 1) / (width + 1)) * _color[0];
+          const green = ((col + 1) / (width + 1)) * _color[1];
+          const blue = ((col + 1) / (width + 1)) * _color[2];
+
+          _clonedRightColorCollection[y][col] = [r(red), r(green), r(blue)];
         }
+
         setYRightColorCollection(_clonedRightColorCollection);
       }
     }
@@ -130,6 +148,7 @@ function App() {
     setMovesLeft(movesLeft - 1);
   };
 
+  // judge if the game is won or lost
   const judge = async () => {
     let finallyJudged = false;
 
@@ -149,23 +168,26 @@ function App() {
     }
   };
 
+  // fetch game details on initial render
   useEffect(() => {
     async function fetchData() {
       isApiCallDirty = true;
       const data = await fetchColor();
       setDetail(data);
     }
-    console.log("useEffect", isApiCallDirty);
     if (isApiCallDirty) return;
     fetchData();
   }, []);
 
+  // initiate color array on detail change ( after game is won or lost)
   useEffect(() => {
     console.log("detail change");
     initiateColorArray();
   }, [detail]);
 
+  // compute the color mix from four different color collections, whenever any of the color collection changes
   useEffect(() => {
+    // make sure all the color collections are set
     if (
       !colorArray ||
       !yLeftColorCollection ||
@@ -174,6 +196,8 @@ function App() {
       !xBottomColorCollection
     )
       return;
+
+    // make sure all the color collections are not empty
     if (
       !colorArray[0] ||
       !yLeftColorCollection[0] ||
@@ -182,6 +206,7 @@ function App() {
       !xBottomColorCollection[0]
     )
       return;
+
     const height = colorArray.length;
     const width = colorArray[0].length;
     const _clonedColorArray = copyColorArray(colorArray);
@@ -191,7 +216,9 @@ function App() {
       percentage: 100,
     } as ClosestColor;
 
+    // loop through rows of the color collections
     for (let row = 0; row < height; row++) {
+      // loop through columns of the color collections
       for (let col = 0; col < width; col++) {
         const red =
           xTopColorCollection[row][col][0] +
@@ -208,12 +235,16 @@ function App() {
           xBottomColorCollection[row][col][2] +
           yLeftColorCollection[row][col][2] +
           yRightColorCollection[row][col][2];
-        const f = 255 / Math.max(red, green, blue, 255);
-        const result = [r(red * f), r(green * f), r(blue * f)] as Target;
+
+        const F = 255 / Math.max(red, green, blue, 255); // normalization factor
+
+        const result = [r(red * F), r(green * F), r(blue * F)] as Target;
         _clonedColorArray[row][col] = result;
 
         if (detail) {
           const closenessPercentage = getColorCloseness(detail?.target, result);
+
+          // if the closeness color percentage is less than what we have, then update the closest color
           if (closenessPercentage < _clonedClosestColor.percentage)
             _clonedClosestColor = {
               color: result,
@@ -230,8 +261,8 @@ function App() {
     }, 100);
   }, [xBottomColorCollection, xTopColorCollection, yLeftColorCollection, yRightColorCollection]);
 
+  // judge if the game is won or lost, whenever the closest color percentage changes
   useEffect(() => {
-    console.log("judge", isGameDirty);
     judge();
   }, [closeColor.percentage]);
 
