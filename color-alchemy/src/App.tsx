@@ -3,29 +3,33 @@ import './App.css'
 import { ClosestColor, ColorArray, LocationType, Response, SourceColorType, Target } from './types'
 import Square from './components/square'
 import Board from './components/Board'
-import { copyColorArray, fetchColor, getColorCloseness, locationToString } from './utils'
+import { copyColorArray, fetchColor, getColorCloseness, locationToString, r } from './utils'
 
 function App() {
 
   const [detail, setDetail] = useState<Response>()
-  const [colorArray, setColorArray] = useState<ColorArray>()
+  const [colorArray, setColorArray] = useState<ColorArray>([])
   const [yLeftColorCollection, setYLeftColorCollection] = useState<ColorArray>()
   const [yRightColorCollection, setYRightColorCollection] = useState<ColorArray>()
   const [xTopColorCollection, setXTopColorCollection] = useState<ColorArray>()
   const [xBottomColorCollection, setXBottomColorCollection] = useState<ColorArray>()
   const [sourceColor, setSourceColor] = useState<SourceColorType>({})
   const [movesLeft, setMovesLeft] = useState<number>(0)
+
   const [closeColor, setCloseColor] = useState<ClosestColor>({
     color: [0,0,0],
     position: {x:0,y:0},
     percentage:100
   })
+  let isApiCallDirty = false;
+  const [isGameDirty, setIsGameDirty] = useState(false);
 
 
 
   const initiateColorArray = () => {
     const _colorArray: ColorArray = []
     const defaultColor: Target = [0, 0, 0]
+    setIsGameDirty(false) ;
 
     if(detail) {
       for(let i=0; i<detail?.height; i++) {
@@ -36,12 +40,14 @@ function App() {
       }
     }
 
-    setColorArray(_colorArray)
-    setXTopColorCollection(copyColorArray(_colorArray))
-    setXBottomColorCollection(copyColorArray(_colorArray))
-    setYLeftColorCollection(copyColorArray(_colorArray))
-    setYRightColorCollection(copyColorArray(_colorArray))
-    setSourceColor({})
+    setTimeout(() => {
+      setColorArray(_colorArray)
+      setXTopColorCollection(copyColorArray(_colorArray))
+      setXBottomColorCollection(copyColorArray(_colorArray))
+      setYLeftColorCollection(copyColorArray(_colorArray))
+      setYRightColorCollection(copyColorArray(_colorArray))
+      setSourceColor({})
+    },100)
   }
 
   const onColorChange = (location:LocationType,color?:Target) => {
@@ -122,30 +128,34 @@ function App() {
 
   const judge = async () => {
     let  finallyJudged = false;
-    if(movesLeft < 1 && confirm('Failed: Do you want to play again?')){
-      
+
+    if( isGameDirty && closeColor.percentage < 10 && confirm('Success: Do you want to play again?')) {
+      finallyJudged = true;
+    } else  if( isGameDirty && movesLeft < 1 && confirm('Failed: Do you want to play again?')){
       finallyJudged = true;
     }
 
-    if(closeColor.percentage < 10 && confirm('Success: Do you want to play again?')) {
-      finallyJudged = true;
-    }
+    setIsGameDirty(true)
 
     if(finallyJudged) {
-      const data = await fetchColor(detail?.userId)
-      setDetail(data)
-      setMovesLeft(data?.maxMoves)
-      initiateColorArray()
+      setTimeout(async () => {
+        const data = await fetchColor(detail?.userId)
+        setDetail(data)
+        setMovesLeft(data?.maxMoves)
+        initiateColorArray()
+      }, 100);
     }
   }
 
   useEffect(() => {
     async function fetchData() {
+      isApiCallDirty = true;
       const data = await fetchColor()
       setDetail(data)
       setMovesLeft(data?.maxMoves)
-      // console.log(data)
     }
+    console.log('useEffect',isApiCallDirty)
+    if(isApiCallDirty) return
     fetchData()
   }, [])
 
@@ -167,11 +177,11 @@ function App() {
 
     for(let row=0; row<height; row++) {
       for(let col=0; col<width; col++) {
-        const red = Math.round(xTopColorCollection[row][col][0] + xBottomColorCollection[row][col][0] + yLeftColorCollection[row][col][0] + yRightColorCollection[row][col][0])
-        const green = Math.round(xTopColorCollection[row][col][1] + xBottomColorCollection[row][col][1] + yLeftColorCollection[row][col][1] + yRightColorCollection[row][col][1])
-        const blue = Math.round(xTopColorCollection[row][col][2] + xBottomColorCollection[row][col][2] + yLeftColorCollection[row][col][2] + yRightColorCollection[row][col][2])
+        const red = xTopColorCollection[row][col][0] + xBottomColorCollection[row][col][0] + yLeftColorCollection[row][col][0] + yRightColorCollection[row][col][0]
+        const green = xTopColorCollection[row][col][1] + xBottomColorCollection[row][col][1] + yLeftColorCollection[row][col][1] + yRightColorCollection[row][col][1]
+        const blue = xTopColorCollection[row][col][2] + xBottomColorCollection[row][col][2] + yLeftColorCollection[row][col][2] + yRightColorCollection[row][col][2]
         const f = 255/ Math.max(red,green,blue, 255)
-        const result = [red * f, green * f, blue * f] as Target
+        const result = [r(red * f), r(green * f), r(blue * f)] as Target
         _clonedColorArray[row][col] = result
 
         if(detail){
@@ -183,10 +193,16 @@ function App() {
       }
     }
 
-    setColorArray(_clonedColorArray)
-    setCloseColor(_clonedClosestColor)
-    judge()
+    setTimeout(() => {
+      setColorArray(_clonedColorArray)
+      setCloseColor(_clonedClosestColor)
+    },100)
   } ,[xBottomColorCollection,xTopColorCollection,yLeftColorCollection,yRightColorCollection])
+
+  useEffect(() => {
+    console.log('judge', isGameDirty)
+    judge()
+  }, [closeColor.percentage])
 
   return (
     <div className="App">
@@ -197,8 +213,9 @@ function App() {
       <div className='info-row'>Closest Color: {detail && <Square color={closeColor.color} />} <span>  Δ= {closeColor.percentage}%</span> </div>
 
       <div>
-        {(colorArray && colorArray.length > 0) &&
-         <Board sourceColor={sourceColor} closeColor={closeColor} colorArray={colorArray} sourceClickable={ detail? detail?.maxMoves -  movesLeft <3 : true}  onColorChange={onColorChange}/> }
+          {colorArray.length > 0 &&
+         <Board sourceColor={sourceColor} closeColor={closeColor} colorArray={colorArray} sourceClickable={ detail? detail?.maxMoves -  movesLeft <3 : true}  onColorChange={onColorChange}/> 
+          }
       </div>
     </div>
   )
