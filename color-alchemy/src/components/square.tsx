@@ -1,5 +1,5 @@
 
-import React, { DragEvent, DragEventHandler, useEffect, useRef } from 'react'
+import React, { DragEvent, useEffect } from 'react'
 import { Target } from '../types'
 
 type SquareProps = {
@@ -12,8 +12,7 @@ export default function Square({ color, close,draggable = false } : SquareProps)
   
 
   function onDrag(e:DragEvent<HTMLDivElement>){
-      console.log('dragstart', color.join(','))
-      e.dataTransfer!.setData("text/plain", color.join(','))
+      e.dataTransfer.setData("text/plain", color.join(','))
   }
   useEffect(() => {
 

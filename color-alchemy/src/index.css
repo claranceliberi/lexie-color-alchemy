@@ -23,12 +23,13 @@ body {
   min-height: 100vh;
 }
 
-p{
+.info-row{
   display:flex;
   justify-content: left;
   align-items: center;
+  margin: 1rem 0;
 }
 
-p > span {
+.info-row > span {
   margin-left:1rem;
 }

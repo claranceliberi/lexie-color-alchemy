@@ -12,7 +12,7 @@ type BoardProps = {
 }
 
 export default function Board({colorArray,sourceColor, closeColor, sourceClickable, onColorChange}: BoardProps) {
-    console.log(colorArray)
+    // console.log(colorArray)
     return <div>
         {colorArray[0].map((color, i) => <Circle clickable={sourceClickable} onColorChange={onColorChange} key={i} color={ sourceColor[`x-top-${i}`] || [0,0,0]} location={{x:i,side:'top'}} />)}
         {colorArray.map((row, i) =>  

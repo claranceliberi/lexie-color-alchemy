@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
+import React, { useEffect, useState } from 'react'
 import './App.css'
 import { ClosestColor, ColorArray, LocationType, Response, SourceColorType, Target } from './types'
 import Square from './components/square'
@@ -16,9 +15,6 @@ function App() {
   const [xBottomColorCollection, setXBottomColorCollection] = useState<ColorArray>()
   const [sourceColor, setSourceColor] = useState<SourceColorType>({})
   const [movesLeft, setMovesLeft] = useState<number>(0)
-  const [isGameOver, setIsGameOver] = useState<boolean>(false)
-  const [isGameWon, setIsGameWon] = useState<boolean>(false)
-  const [isGameLost, setIsGameLost] = useState<boolean>(false)
   const [closeColor, setCloseColor] = useState<ClosestColor>({
     color: [0,0,0],
     position: {x:0,y:0},
@@ -148,7 +144,7 @@ function App() {
       const data = await fetchColor()
       setDetail(data)
       setMovesLeft(data?.maxMoves)
-      console.log(data)
+      // console.log(data)
     }
     fetchData()
   }, [])
@@ -158,7 +154,8 @@ function App() {
   }, [detail])
 
   useEffect( () => {
-    if(!colorArray || !colorArray[0] || !yLeftColorCollection || !yRightColorCollection || !xTopColorCollection || !xBottomColorCollection) return
+    if(!colorArray|| !yLeftColorCollection || !yRightColorCollection|| !xTopColorCollection || !xBottomColorCollection) return
+    if(!colorArray[0] || !yLeftColorCollection[0] || !yRightColorCollection[0] || !xTopColorCollection[0] || !xBottomColorCollection[0]) return
     const height = colorArray.length
     const width = colorArray[0].length
     const _clonedColorArray = copyColorArray(colorArray)
@@ -179,7 +176,7 @@ function App() {
 
         if(detail){
           const closenessPercentage = getColorCloseness(detail?.target, result);
-          console.log('%cclosenessPercentage', `background-color: rgb(${result[0]},${result[1]},${result[2]});padding:10px; color:white;`, closenessPercentage, `{x:${col+1},y:${col+1}}` )
+          // console.log('%cclosenessPercentage', `background-color: rgb(${result[0]},${result[1]},${result[2]});padding:10px; color:white;`, closenessPercentage, `{x:${col+1},y:${col+1}}` )
           if(closenessPercentage < _clonedClosestColor.percentage)
             _clonedClosestColor = {color: result, percentage: closenessPercentage, position: {x: col, y: row}}
         }
@@ -194,10 +191,10 @@ function App() {
   return (
     <div className="App">
       <h2 style={{textAlign:'left'}}>RGBA Alchemy</h2>
-      <p>User Id: {detail?.userId}</p>
-      <p>MovesLeft: {movesLeft}</p>
-      <p>Target Color: {detail && <Square color={detail?.target} />} </p>
-      <p>Closest Color: {detail && <Square color={closeColor.color} />} <span>  Δ= {closeColor.percentage}</span> </p>
+      <div className='info-row'>User Id: {detail?.userId}</div>
+      <div className='info-row'>MovesLeft: {movesLeft}</div>
+      <div className='info-row'>Target Color: {detail && <Square color={detail?.target} />} </div>
+      <div className='info-row'>Closest Color: {detail && <Square color={closeColor.color} />} <span>  Δ= {closeColor.percentage}%</span> </div>
 
       <div>
         {(colorArray && colorArray.length > 0) &&

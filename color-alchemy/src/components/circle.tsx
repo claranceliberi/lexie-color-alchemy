@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, DragEvent } from 'react'
+import React, { useRef, DragEvent } from 'react'
 import { LocationType, Target } from '../types'
 
 type CircleProps = {
@@ -27,6 +27,8 @@ export default function Circle({ color,location, clickable ,onColorChange } : Ci
  
   return (
     <div
+        role={clickable ? 'button' : 'none'}
+        onKeyUp={() => clickable && onColorChange(location)}
         onClick={() => clickable && onColorChange(location)}
         onDragOver={onDrag}
         onDragEnter={onDrag}
