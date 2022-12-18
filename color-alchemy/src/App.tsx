@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
-import { ClosestColor, ColorArray, LocationType, Response, SourceColorType, Target } from './types';
-import Square from './components/square';
-import Board from './components/Board';
-import { copyColorArray, fetchColor, getColorCloseness, locationToString, r } from './utils';
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import { ClosestColor, ColorArray, LocationType, Response, SourceColorType, Target } from "./types";
+import {Tile} from "./components/Tile";
+import Board from "./components/Board/Board";
+import { copyColorArray, fetchColor, getColorCloseness, locationToString, r } from "./utils";
 
 function App() {
   const [detail, setDetail] = useState<Response>();
@@ -80,10 +80,10 @@ function App() {
     const width = colorArray[0].length;
 
     if (x || x === 0) {
-      if (side === 'top') {
+      if (side === "top") {
         const _clonedTopColorCollection = copyColorArray(xTopColorCollection);
         for (let row = height; row > 0; row--) {
-          console.log('inside top g');
+          console.log("inside top g");
           const red = Math.round(((height + 1 - row) / (height + 1)) * _color[0]);
           const green = Math.round(((height + 1 - row) / (height + 1)) * _color[1]);
           const blue = Math.round(((height + 1 - row) / (height + 1)) * _color[2]);
@@ -92,7 +92,7 @@ function App() {
         }
         setXTopColorCollection(_clonedTopColorCollection);
       }
-      if (side === 'bottom') {
+      if (side === "bottom") {
         const _clonedBottomColorCollection = copyColorArray(xBottomColorCollection);
         for (let row = 0; row < height; row++) {
           const red = Math.round(((row + 1) / (height + 1)) * _color[0]);
@@ -105,7 +105,7 @@ function App() {
     }
 
     if (y || y === 0) {
-      if (side === 'left') {
+      if (side === "left") {
         const _clonedLeftColorCollection = copyColorArray(yLeftColorCollection);
         for (let col = 0; col < width; col++) {
           const red = Math.round(((width + 1 - col) / (width + 1)) * _color[0]);
@@ -115,7 +115,7 @@ function App() {
         }
         setYLeftColorCollection(_clonedLeftColorCollection);
       }
-      if (side === 'right') {
+      if (side === "right") {
         const _clonedRightColorCollection = copyColorArray(yRightColorCollection);
         for (let col = 0; col < width; col++) {
           const red = Math.round(((col + 1) / (width + 1)) * _color[0]);
@@ -133,13 +133,9 @@ function App() {
   const judge = async () => {
     let finallyJudged = false;
 
-    if (
-      isGameDirty &&
-      closeColor.percentage < 10 &&
-      confirm('Success: Do you want to play again?')
-    ) {
+    if (isGameDirty && closeColor.percentage < 10 && confirm("Success: Do you want to play again?")) {
       finallyJudged = true;
-    } else if (isGameDirty && movesLeft < 1 && confirm('Failed: Do you want to play again?')) {
+    } else if (isGameDirty && movesLeft < 1 && confirm("Failed: Do you want to play again?")) {
       finallyJudged = true;
     }
 
@@ -159,13 +155,13 @@ function App() {
       const data = await fetchColor();
       setDetail(data);
     }
-    console.log('useEffect', isApiCallDirty);
+    console.log("useEffect", isApiCallDirty);
     if (isApiCallDirty) return;
     fetchData();
   }, []);
 
   useEffect(() => {
-    console.log('detail change');
+    console.log("detail change");
     initiateColorArray();
   }, [detail]);
 
@@ -218,7 +214,6 @@ function App() {
 
         if (detail) {
           const closenessPercentage = getColorCloseness(detail?.target, result);
-          // console.log('%cclosenessPercentage', `background-color: rgb(${result[0]},${result[1]},${result[2]});padding:10px; color:white;`, closenessPercentage, `{x:${col+1},y:${col+1}}` )
           if (closenessPercentage < _clonedClosestColor.percentage)
             _clonedClosestColor = {
               color: result,
@@ -236,19 +231,18 @@ function App() {
   }, [xBottomColorCollection, xTopColorCollection, yLeftColorCollection, yRightColorCollection]);
 
   useEffect(() => {
-    console.log('judge', isGameDirty);
+    console.log("judge", isGameDirty);
     judge();
   }, [closeColor.percentage]);
 
   return (
-    <div className='App'>
-      <h2 style={{ textAlign: 'left' }}>RGBA Alchemy</h2>
-      <div className='info-row'>User Id: {detail?.userId}</div>
-      <div className='info-row'>MovesLeft: {movesLeft}</div>
-      <div className='info-row'>Target Color: {detail && <Square color={detail?.target} />} </div>
-      <div className='info-row'>
-        Closest Color: {detail && <Square color={closeColor.color} />}{' '}
-        <span> Δ= {closeColor.percentage}%</span>{' '}
+    <div className="App">
+      <h2 style={{ textAlign: "left" }}>RGBA Alchemy</h2>
+      <div className="info-row">User Id: {detail?.userId}</div>
+      <div className="info-row">MovesLeft: {movesLeft}</div>
+      <div className="info-row">Target Color: {detail && <Tile color={detail?.target} />} </div>
+      <div className="info-row">
+        Closest Color: {detail && <Tile color={closeColor.color} />} <span> Δ= {closeColor.percentage}%</span>{" "}
       </div>
 
       <div>

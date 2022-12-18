@@ -1,5 +1,10 @@
 import { LocationType, Response, Target } from './types';
 
+/**
+ * Fetch game details from server
+ * @param userId - optional user id
+ * @returns Promise<Response>
+ */
 export const fetchColor = async (userId?: string) => {
   const response = userId
     ? await fetch('http://localhost:9876/init/user/' + userId)
@@ -9,6 +14,11 @@ export const fetchColor = async (userId?: string) => {
   return data;
 };
 
+/**
+ * Convert location object into string for key
+ * @param location
+ * @returns string
+ */
 export const locationToString = ({ x, y, side }: LocationType) => {
   if (x || x === 0) {
     return `x-${side}-${x}`;
@@ -17,8 +27,18 @@ export const locationToString = ({ x, y, side }: LocationType) => {
   return `y-${side}-${y}`;
 };
 
+/**
+ * Clone a color array
+ * @param colorArray
+ */
 export const copyColorArray = <T>(colorArray: T) => JSON.parse(JSON.stringify(colorArray)) as T;
 
+/**
+ * Get the closest color to the target color
+ * @param targetColor
+ * @param colorArray
+ * @returns number
+  */
 export const getColorCloseness = (targetColor: Target, testColor: Target) => {
   const closeness =
     (1 / 255) *
