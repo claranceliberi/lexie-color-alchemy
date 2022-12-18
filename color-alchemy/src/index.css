@@ -13,21 +13,19 @@
   -webkit-text-size-adjust: 100%;
 }
 
-
-
 body {
   margin: 0;
   min-width: 100vw;
   min-height: 100vh;
 }
 
-.info-row{
-  display:flex;
+.info-row {
+  display: flex;
   justify-content: left;
   align-items: center;
   margin: 1rem 0;
 }
 
 .info-row > span {
-  margin-left:1rem;
+  margin-left: 1rem;
 }
