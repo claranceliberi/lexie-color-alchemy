@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import { ClosestColor, ColorArray, LocationType, Response, SourceColorType, Target } from "./types";
-import {Tile} from "./components/Tile";
+import { Tile } from "./components/Tile";
 import Board from "./components/Board/Board";
 import { copyColorArray, fetchColor, getColorCloseness, locationToString, r } from "./utils";
 
 function App() {
-  const [detail, setDetail] = useState<Response>();
+  const [details, setDetails] = useState<Response>();
   const [colorArray, setColorArray] = useState<ColorArray>([]);
   const [yLeftColorCollection, setYLeftColorCollection] = useState<ColorArray>();
   const [yRightColorCollection, setYRightColorCollection] = useState<ColorArray>();
@@ -14,25 +14,26 @@ function App() {
   const [xBottomColorCollection, setXBottomColorCollection] = useState<ColorArray>();
   const [sourceColor, setSourceColor] = useState<SourceColorType>({});
   const [movesLeft, setMovesLeft] = useState<number>(0);
+  const [isRestarting, setIsRestarting] = useState(false); // to avoid multiple api call
 
   const [closeColor, setCloseColor] = useState<ClosestColor>({
     color: [0, 0, 0],
     position: { x: 0, y: 0 },
     percentage: 100,
   });
-  let isApiCallDirty = false; // to know if user has played at least once 
-  const [isGameDirty, setIsGameDirty] = useState(false);
+  let isApiCallDirty = false; // to avoid multiple api call
+  const [isGameDirty, setIsGameDirty] = useState(false); // to detect if user has played at least one move on the game
 
   // set all color collection to default (black)
   const initiateColorArray = () => {
     const _colorArray: ColorArray = [];
-    const defaultColor: Target = [0, 0, 0];
+    const defaultColor: Target = [0, 0, 0]; // black / rgb(0, 0, 0)
     setIsGameDirty(false);
 
-    if (detail) {
-      for (let i = 0; i < detail?.height; i++) {
+    if (details) {
+      for (let i = 0; i < details?.height; i++) {
         _colorArray.push([]);
-        for (let j = 0; j < detail?.width; j++) {
+        for (let j = 0; j < details?.width; j++) {
           _colorArray[i].push(defaultColor);
         }
       }
@@ -40,7 +41,7 @@ function App() {
 
     // set all at the same time to avoid multiple re-render
     setTimeout(() => {
-      setMovesLeft(detail?.maxMoves || 0);
+      setMovesLeft(details?.maxMoves || 0);
       setColorArray(_colorArray);
       setXTopColorCollection(copyColorArray(_colorArray));
       setXBottomColorCollection(copyColorArray(_colorArray));
@@ -50,18 +51,18 @@ function App() {
     }, 100);
   };
 
-  const onColorChange = (location: LocationType, color?: Target) => {
+  const computeColorShades = (location: LocationType, color?: Target) => {
     const locationString = locationToString(location);
     let _color = color || ([0, 0, 0] as Target);
 
-    // on first click set source color to red
-    if (detail && detail?.maxMoves - movesLeft === 0) {
+    // on first click set source color to red / rgb(255, 0, 0)
+    if (details && details?.maxMoves - movesLeft === 0) {
       _color = [255, 0, 0];
-    } else if (detail && detail?.maxMoves - movesLeft === 1) {
-      // on second click set source color to green
+    } else if (details && details?.maxMoves - movesLeft === 1) {
+      // on second click set source color to green / rgb(0, 255, 0)
       _color = [0, 255, 0];
-    } else if (detail && detail?.maxMoves - movesLeft === 2) {
-      // on third click set source color to blue
+    } else if (details && details?.maxMoves - movesLeft === 2) {
+      // on third click set source color to blue / rgb(0, 0, 255)
       _color = [0, 0, 255];
     }
 
@@ -150,21 +151,25 @@ function App() {
 
   // judge if the game is won or lost
   const judge = async () => {
-    let finallyJudged = false;
+    if (isRestarting) return;
+
+    let judged = false;
 
     if (isGameDirty && closeColor.percentage < 10 && confirm("Success: Do you want to play again?")) {
-      finallyJudged = true;
+      judged = true;
     } else if (isGameDirty && movesLeft < 1 && confirm("Failed: Do you want to play again?")) {
-      finallyJudged = true;
+      judged = true;
     }
 
     setIsGameDirty(true);
 
-    if (finallyJudged) {
+    if (judged) {
+      setIsRestarting(true);
       setTimeout(async () => {
-        const data = await fetchColor(detail?.userId);
-        setDetail(data);
-      }, 100);
+        const data = await fetchColor(details?.userId);
+        setDetails(data);
+        setIsRestarting(false);
+      }, 100); // wait for 100ms before fetching new game details, to avoid the game details being fetched before the react proper render
     }
   };
 
@@ -173,17 +178,16 @@ function App() {
     async function fetchData() {
       isApiCallDirty = true;
       const data = await fetchColor();
-      setDetail(data);
+      setDetails(data);
     }
     if (isApiCallDirty) return;
     fetchData();
   }, []);
 
-  // initiate color array on detail change ( after game is won or lost)
+  // initiate color array on details change ( after game is won or lost)
   useEffect(() => {
-    console.log("detail change");
     initiateColorArray();
-  }, [detail]);
+  }, [details]);
 
   // compute the color mix from four different color collections, whenever any of the color collection changes
   useEffect(() => {
@@ -241,8 +245,8 @@ function App() {
         const result = [r(red * F), r(green * F), r(blue * F)] as Target;
         _clonedColorArray[row][col] = result;
 
-        if (detail) {
-          const closenessPercentage = getColorCloseness(detail?.target, result);
+        if (details) {
+          const closenessPercentage = getColorCloseness(details?.target, result);
 
           // if the closeness color percentage is less than what we have, then update the closest color
           if (closenessPercentage < _clonedClosestColor.percentage)
@@ -264,16 +268,16 @@ function App() {
   // judge if the game is won or lost, whenever the closest color percentage changes
   useEffect(() => {
     judge();
-  }, [closeColor.percentage]);
+  }, [closeColor.percentage, movesLeft]);
 
   return (
     <div className="App">
       <h2 style={{ textAlign: "left" }}>RGBA Alchemy</h2>
-      <div className="info-row">User Id: {detail?.userId}</div>
+      <div className="info-row">User Id: {details?.userId}</div>
       <div className="info-row">MovesLeft: {movesLeft}</div>
-      <div className="info-row">Target Color: {detail && <Tile color={detail?.target} />} </div>
+      <div className="info-row">Target Color: {details && <Tile color={details?.target} />} </div>
       <div className="info-row">
-        Closest Color: {detail && <Tile color={closeColor.color} />} <span> Δ= {closeColor.percentage}%</span>{" "}
+        Closest Color: {details && <Tile color={closeColor.color} />} <span> Δ= {closeColor.percentage}%</span>{" "}
       </div>
 
       <div>
@@ -282,8 +286,8 @@ function App() {
             sourceColor={sourceColor}
             closeColor={closeColor}
             colorArray={colorArray}
-            sourceClickable={detail ? detail?.maxMoves - movesLeft < 3 : true}
-            onColorChange={onColorChange}
+            sourceClickable={details ? details?.maxMoves - movesLeft < 3 : true}
+            onColorChange={computeColorShades}
           />
         )}
       </div>
