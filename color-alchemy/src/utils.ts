@@ -20,6 +20,10 @@ export const fetchColor = async (userId?: string) => {
  * @returns string
  */
 export const locationToString = ({ x, y, side }: LocationType) => {
+
+  if(!x && !y && x !== 0 && y !== 0)
+    throw new Error('x and y are undefined')
+
   if (x || x === 0) {
     return `x-${side}-${x}`;
   }
