@@ -298,8 +298,8 @@ function App() {
         <div style={{paddingTop:"1rem"}}>
           <h2>Rules:</h2>
           <ul>
-            <li>You are allowed click on 3 sources: <Source color={[145, 189, 172]} />   </li>
-            <li>Then move <Tile color={[145, 189, 172]} /> to  <Source color={[145, 189, 172]} /> as long as you have some moves left  </li>
+            <li>You are allowed click on 3 sources: <Source onColorChange={() => console.log('testing')} color={[0, 0, 0]} location={{ y: 0, side: "right" }} />   </li>
+            <li>Then move <Tile color={[145, 189, 172]} /> to  <Source onColorChange={() => console.log('testing')} color={[0, 0, 0]} location={{ y: 0, side: "right" }} /> as long as you have some moves left  </li>
           </ul>
         </div>
 
