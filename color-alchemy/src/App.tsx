@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import { ClosestColor, ColorArray, LocationType, Response, SourceColorType, Target } from "./types";
 import { Tile } from "./components/Tile";
+import { Source } from "./components/Source";
 import Board from "./components/Board/Board";
 import { copyColorArray, fetchColor, getColorCloseness, locationToString, r } from "./utils";
 
