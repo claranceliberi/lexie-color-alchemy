@@ -7,8 +7,8 @@ import { LocationType, Response, Target } from './types';
  */
 export const fetchColor = async (userId?: string) => {
   const response = userId
-    ? await fetch('http://localhost:9876/init/user/' + userId)
-    : await fetch('http://localhost:9876/init');
+    ? await fetch('https://lexie-color-alchemy-backend.onrender.com/init/user/' + userId)
+    : await fetch('https://lexie-color-alchemy-backend.onrender.com/init');
   const data = (await response.json()) as Response;
   if (userId) console.log('userId', userId);
   return data;
