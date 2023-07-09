@@ -272,6 +272,8 @@ function App() {
 
   return (
     <div className="App">
+      
+
       <h2 style={{ textAlign: "left" }}>RGBA Alchemy</h2>
       <div className="info-row">User Id: {details?.userId}</div>
       <div className="info-row">MovesLeft: {movesLeft}</div>
@@ -291,6 +293,15 @@ function App() {
           />
         )}
       </div>
+
+        <div style={{paddingTop:"1rem"}}>
+          <h2>Rules:</h2>
+          <ul>
+            <li>You are allowed click on 3 sources: <Source color={[145, 189, 172]} />   </li>
+            <li>Then move <Tile color={[145, 189, 172]} /> to  <Source color={[145, 189, 172]} /> as long as you have some moves left  </li>
+          </ul>
+        </div>
+
     </div>
   );
 }
