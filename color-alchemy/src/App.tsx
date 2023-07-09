@@ -295,7 +295,7 @@ function App() {
         )}
       </div>
 
-        <div style={{paddingTop:"1rem"}}>
+        <div style={{paddingTop:"1rem"}} className="info-row">
           <h2>Rules:</h2>
           <ul>
             <li>You are allowed click on 3 sources: <Source onColorChange={() => console.log('testing')} color={[0, 0, 0]} location={{ y: 0, side: "right" }} />   </li>
