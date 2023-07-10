@@ -284,7 +284,7 @@ function App() {
       </div>
 
       <div>
-        {colorArray.length > 0 && (
+        {colorArray.length > 0 ? (
           <Board
             sourceColor={sourceColor}
             closeColor={closeColor}
@@ -292,7 +292,8 @@ function App() {
             sourceClickable={details ? details?.maxMoves - movesLeft < 3 : true}
             onColorChange={computeColorShades}
           />
-        )}
+        ): <span>Loading...</span>
+      }
       </div>
 
         <div style={{paddingTop:"1rem"}} className="info-row">
